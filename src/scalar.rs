@@ -1,19 +1,13 @@
 //! This module provides an implementation of the BLS12-381 scalar field $\mathbb{F}_q$
 //! where `q = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001`
 
-use core::convert::TryFrom;
+use core::convert::{TryFrom, TryInto};
 use core::fmt;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use rand_core::RngCore;
 
-use ff::{Field, PrimeField};
+use ff::{Field, FieldBits, PrimeField};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption};
-
-#[cfg(feature = "bits")]
-use core::convert::TryInto;
-
-#[cfg(feature = "bits")]
-use ff::{FieldBits, PrimeFieldBits};
 
 use crate::util::{adc, mac, sbb};
 
@@ -77,7 +71,7 @@ impl ConditionallySelectable for Scalar {
 
 /// Constant representing the modulus
 /// q = 0x73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff00000001
-const MODULUS: Scalar = Scalar([
+pub const MODULUS: Scalar = Scalar([
     0xffff_ffff_0000_0001,
     0x53bd_a402_fffe_5bfe,
     0x3339_d808_09a1_d805,
@@ -85,7 +79,7 @@ const MODULUS: Scalar = Scalar([
 ]);
 
 /// The modulus as u32 limbs.
-#[cfg(all(feature = "bits", not(target_pointer_width = "64")))]
+#[cfg(not(target_pointer_width = "64"))]
 const MODULUS_LIMBS_32: [u32; 8] = [
     0x0000_0001,
     0xffff_ffff,
@@ -702,8 +696,15 @@ impl Field for Scalar {
     }
 }
 
+#[cfg(not(target_pointer_width = "64"))]
+type ReprBits = [u32; 8];
+
+#[cfg(target_pointer_width = "64")]
+type ReprBits = [u64; 4];
+
 impl PrimeField for Scalar {
     type Repr = [u8; 32];
+    type ReprBits = ReprBits;
 
     fn from_repr(r: Self::Repr) -> Option<Self> {
         let res = Self::from_bytes(&r);
@@ -717,34 +718,6 @@ impl PrimeField for Scalar {
     fn to_repr(&self) -> Self::Repr {
         self.to_bytes()
     }
-
-    fn is_odd(&self) -> bool {
-        self.to_bytes()[0] & 1 == 1
-    }
-
-    const NUM_BITS: u32 = MODULUS_BITS;
-    const CAPACITY: u32 = Self::NUM_BITS - 1;
-
-    fn multiplicative_generator() -> Self {
-        GENERATOR
-    }
-
-    const S: u32 = S;
-
-    fn root_of_unity() -> Self {
-        ROOT_OF_UNITY
-    }
-}
-
-#[cfg(all(feature = "bits", not(target_pointer_width = "64")))]
-type ReprBits = [u32; 8];
-
-#[cfg(all(feature = "bits", target_pointer_width = "64"))]
-type ReprBits = [u64; 4];
-
-#[cfg(feature = "bits")]
-impl PrimeFieldBits for Scalar {
-    type ReprBits = ReprBits;
 
     fn to_le_bits(&self) -> FieldBits<Self::ReprBits> {
         let bytes = self.to_bytes();
@@ -772,6 +745,10 @@ impl PrimeFieldBits for Scalar {
         FieldBits::new(limbs)
     }
 
+    fn is_odd(&self) -> bool {
+        self.to_bytes()[0] & 1 == 1
+    }
+
     fn char_le_bits() -> FieldBits<Self::ReprBits> {
         #[cfg(not(target_pointer_width = "64"))]
         {
@@ -780,6 +757,19 @@ impl PrimeFieldBits for Scalar {
 
         #[cfg(target_pointer_width = "64")]
         FieldBits::new(MODULUS.0)
+    }
+
+    const NUM_BITS: u32 = MODULUS_BITS;
+    const CAPACITY: u32 = Self::NUM_BITS - 1;
+
+    fn multiplicative_generator() -> Self {
+        GENERATOR
+    }
+
+    const S: u32 = S;
+
+    fn root_of_unity() -> Self {
+        ROOT_OF_UNITY
     }
 }
 

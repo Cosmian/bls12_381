@@ -11,7 +11,7 @@
 #![no_std]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 // Catch documentation errors caused by code changes.
-#![deny(broken_intra_doc_links)]
+#![deny(intra_doc_link_resolution_failure)]
 #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
 #![deny(unsafe_code)]
@@ -81,10 +81,3 @@ pub use pairings::{pairing, Bls12, Gt, MillerLoopResult};
 
 #[cfg(all(feature = "pairings", feature = "alloc"))]
 pub use pairings::{multi_miller_loop, G2Prepared};
-
-/// Use the generic_array re-exported by digest to avoid a version mismatch
-#[cfg(feature = "experimental")]
-pub(crate) use digest::generic_array;
-
-#[cfg(feature = "experimental")]
-pub mod hash_to_curve;

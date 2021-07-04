@@ -340,20 +340,29 @@ impl Fp2 {
         res
     }
 
-    /// Vartime exponentiation for larger exponents, only
-    /// used in testing and not exposed through the public API.
-    #[cfg(all(test, feature = "experimental"))]
-    pub(crate) fn pow_vartime_extended(&self, by: &[u64]) -> Self {
-        let mut res = Self::one();
-        for e in by.iter().rev() {
-            for i in (0..64).rev() {
-                res = res.square();
+    /// Attempts to convert a big-endian byte representation into an `Fp2`.
+    ///
+    /// Only fails when the underlying Fp elements are not canonical,
+    /// but not when `Fp2` is not part of the subgroup.
+    pub fn from_bytes_unchecked(bytes: &[u8; 96]) -> CtOption<Fp2> {
+        let mut buf = [0u8; 48];
 
-                if ((*e >> i) & 1) == 1 {
-                    res *= self;
-                }
-            }
-        }
+        buf.copy_from_slice(&bytes[0..48]);
+        let c0 = Fp::from_bytes(&buf);
+        buf.copy_from_slice(&bytes[48..96]);
+        let c1 = Fp::from_bytes(&buf);
+
+        c0.and_then(|c0| c1.map(|c1| Fp2 { c0, c1 }))
+    }
+
+    /// Converts an element of `Fp2` into a byte representation in
+    /// big-endian byte order.
+    pub fn to_bytes(&self) -> [u8; 96] {
+        let mut res = [0; 96];
+
+        res[0..48].copy_from_slice(&self.c0.to_bytes());
+        res[48..96].copy_from_slice(&self.c1.to_bytes());
+
         res
     }
 }
