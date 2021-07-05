@@ -658,6 +658,14 @@ impl<'a> From<&'a Scalar> for [u8; 32] {
     }
 }
 
+impl<'a> From<&'a Scalar> for [u64; 4] {
+    fn from(value: &'a Scalar) -> [u64; 4] {
+        let res =
+            Scalar::montgomery_reduce(value.0[0], value.0[1], value.0[2], value.0[3], 0, 0, 0, 0);
+        res.0
+    }
+}
+
 impl Field for Scalar {
     fn random(mut rng: impl RngCore) -> Self {
         let mut buf = [0; 64];
