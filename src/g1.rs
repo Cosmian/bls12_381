@@ -553,7 +553,7 @@ impl_binops_multiplicative_mixed!(G1Affine, Scalar, G1Projective);
 fn mul_by_3b(a: Fp) -> Fp {
     let a = a + a; // 2
     let a = a + a; // 4
-                      // 12
+                   // 12
     a + a + a
 }
 
