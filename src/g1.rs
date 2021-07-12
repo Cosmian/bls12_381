@@ -553,8 +553,8 @@ impl_binops_multiplicative_mixed!(G1Affine, Scalar, G1Projective);
 fn mul_by_3b(a: Fp) -> Fp {
     let a = a + a; // 2
     let a = a + a; // 4
-    let a = a + a + a; // 12
-    a
+                      // 12
+    a + a + a
 }
 
 impl G1Projective {
@@ -705,7 +705,7 @@ impl G1Projective {
             z: z3,
         };
 
-        G1Projective::conditional_select(&tmp, &self, rhs.is_identity())
+        G1Projective::conditional_select(&tmp, self, rhs.is_identity())
     }
 
     fn multiply(&self, by: &[u8; 32]) -> G1Projective {
@@ -791,7 +791,7 @@ impl G1Projective {
             q.y = p.y * tmp;
             q.infinity = Choice::from(0u8);
 
-            *q = G1Affine::conditional_select(&q, &G1Affine::identity(), skip);
+            *q = G1Affine::conditional_select(q, &G1Affine::identity(), skip);
         }
     }
 

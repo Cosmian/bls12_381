@@ -247,7 +247,7 @@ impl Fp12 {
     pub fn is_element(&self) -> Choice {
         // The exponent is a constant,
         // thus this operation is constant time as well.
-        let modulus_pow = self.pow_vartime(&<[u64; 4]>::from(MODULUS.0));
+        let modulus_pow = self.pow_vartime(&MODULUS.0);
 
         // Any field of characteristic p has at most one subgroup
         // of order q so it suffices to check that raising the
