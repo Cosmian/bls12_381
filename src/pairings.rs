@@ -255,7 +255,7 @@ impl Gt {
     /// Attempts to deserialize a compressed element. See [`notes::serialization`](crate::notes::serialization)
     /// for details about how group elements are serialized.
     pub fn from_compressed(bytes: &[u8; 288]) -> CtOption<Self> {
-        Self::from_compressed_unchecked(bytes).and_then(|p| CtOption::new(p, p.0.is_element()))
+        Self::from_compressed_unchecked(bytes).and_then(|p| CtOption::new(p, p.0.is_gt_element()))
     }
 
     /// Attempts to deserialize a compressed element, not checking if the

@@ -253,7 +253,36 @@ impl Fp12 {
         // of order q so it suffices to check that raising the
         // element to the power q aka scalar::MODULUS gives the
         // identity.
+
         modulus_pow.ct_eq(&Fp12::one())
+    }
+
+    /// Returns true if this element belongs to the Fp12 group.
+    pub fn is_gt_element(&self) -> Choice {
+        // The order of the element must be exactly q in order to avoid
+        // possible small groups attacks on bls12_381.
+
+        let x_p = self.frobenius_map();
+        let x_p2 = x_p.frobenius_map();
+        let x_p4 = x_p2.frobenius_map().frobenius_map();
+        let x_p4_x = x_p4.mul(self);
+        // Two verifications must be made:
+        // - on one part, check that x^(p^4)*x == x^(p^2).
+        //   It means to verify that x^(p^4-p^2+1) == 1 and then Ord(x)
+        //   divides p^4-p^2+1.
+        let first_check = x_p4_x.ct_eq(&x_p2);
+
+        // - on another part, check that x^p == x^u.
+        //   It means to verify that p+1-t = p-u. Since gcd(p+1-t,p^4-p^2+1) = r
+        //   and Ord(x) divides p+1-t, then Ord(x) is exactly r.
+        let x_minus_u = self.pow_vartime(&[crate::BLS_X]);
+        let x_u = x_minus_u.invert();
+        if x_u.is_some().into() {
+            let second_check = x_p.ct_eq(&x_u.unwrap());
+            self.is_element() & first_check & second_check
+        } else {
+            Choice::from(0)
+        }
     }
 }
 
