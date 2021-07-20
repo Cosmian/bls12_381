@@ -189,6 +189,15 @@ impl G1Affine {
         }
     }
 
+    /// Returns the inverse of a point in G1
+    pub fn inverse(&self) -> G1Affine {
+        G1Affine {
+            x: self.x,
+            y: self.y.neg(),
+            infinity: self.infinity,
+        }
+    }
+
     /// Returns a fixed generator of the group. See [`notes::design`](notes/design/index.html#fixed-generators)
     /// for how this generator is chosen.
     pub fn generator() -> G1Affine {
