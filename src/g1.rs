@@ -2,6 +2,7 @@
 
 use core::borrow::Borrow;
 use core::fmt;
+use core::hash::{Hash, Hasher};
 use core::iter::Sum;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use group::{
@@ -29,6 +30,17 @@ pub struct G1Affine {
     pub(crate) x: Fp,
     pub(crate) y: Fp,
     infinity: Choice,
+}
+
+impl Hash for G1Affine {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        if bool::from(self.infinity) {
+            0.hash(state);
+        } else {
+            self.x.hash(state);
+            self.y.hash(state);
+        }
+    }
 }
 
 impl Default for G1Affine {
@@ -426,7 +438,7 @@ impl G1Affine {
 
 /// This is an element of $\mathbb{G}_1$ represented in the projective coordinate space.
 #[cfg_attr(docsrs, doc(cfg(feature = "groups")))]
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Hash, Debug)]
 pub struct G1Projective {
     x: Fp,
     y: Fp,
