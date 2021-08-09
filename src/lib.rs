@@ -44,6 +44,8 @@ pub mod notes {
     pub mod serialization;
 }
 
+pub mod hash_to_curve;
+
 mod scalar;
 
 pub use scalar::Scalar;

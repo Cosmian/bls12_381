@@ -49,6 +49,10 @@ version = "2.2.1"
 default-features = false
 [dev-dependencies.criterion]
 version = "0.3"
+[dependencies.generic-array]
+version = "*"
+[dependencies.digest]
+version="*"
 
 [features]
 alloc = ["group/alloc"]
