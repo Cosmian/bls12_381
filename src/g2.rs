@@ -611,6 +611,14 @@ impl<'a, 'b> Mul<&'b Scalar> for &'a G2Projective {
     }
 }
 
+impl<'a, 'b> Mul<&'b G2Projective> for &'a Scalar {
+    type Output = G2Projective;
+
+    fn mul(self, other: &'b G2Projective) -> Self::Output {
+        other.multiply(&self.to_bytes())
+    }
+}
+
 impl<'a, 'b> Mul<&'b Scalar> for &'a G2Affine {
     type Output = G2Projective;
 

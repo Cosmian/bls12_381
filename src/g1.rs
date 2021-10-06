@@ -566,6 +566,14 @@ impl<'a, 'b> Mul<&'b Scalar> for &'a G1Affine {
     }
 }
 
+impl<'a, 'b> Mul<&'b G1Projective> for &'a Scalar {
+    type Output = G1Projective;
+
+    fn mul(self, other: &'b G1Projective) -> Self::Output {
+        other.multiply(&self.to_bytes())
+    }
+}
+
 impl_binops_additive!(G1Projective, G1Projective);
 impl_binops_multiplicative!(G1Projective, Scalar);
 impl_binops_multiplicative_mixed!(G1Affine, Scalar, G1Projective);
