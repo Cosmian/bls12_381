@@ -48,6 +48,8 @@ pub mod hash_to_curve;
 
 mod scalar;
 
+// export $q$
+pub use scalar::MODULUS;
 pub use scalar::Scalar;
 
 #[cfg(feature = "groups")]
