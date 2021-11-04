@@ -11,7 +11,7 @@
 #![no_std]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 // Catch documentation errors caused by code changes.
-#![deny(intra_doc_link_resolution_failure)]
+#![deny(broken_intra_doc_links)]
 #![deny(missing_debug_implementations)]
 #![deny(missing_docs)]
 #![deny(unsafe_code)]
@@ -49,8 +49,8 @@ pub mod hash_to_curve;
 mod scalar;
 
 // export $q$
-pub use scalar::MODULUS;
 pub use scalar::Scalar;
+pub use scalar::MODULUS;
 
 #[cfg(feature = "groups")]
 mod fp;

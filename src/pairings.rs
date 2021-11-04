@@ -185,7 +185,7 @@ impl_add_binop_specify_output!(MillerLoopResult, MillerLoopResult, MillerLoopRes
 /// keep code and abstractions consistent.
 #[cfg_attr(docsrs, doc(cfg(feature = "pairings")))]
 #[derive(Copy, Clone, Debug, Default, Hash)]
-pub struct Gt(pub(crate) Fp12);
+pub struct Gt(pub Fp12);
 
 impl fmt::Display for Gt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
