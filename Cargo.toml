@@ -12,7 +12,7 @@
 
 [package]
 edition = "2018"
-name = "bls12_381"
+name = "cosmian_bls12_381"
 version = "0.4.0"
 authors = ["Sean Bowe <ewillbefull@gmail.com>", "Jack Grigg <thestr4d@gmail.com>"]
 description = "Implementation of the BLS12-381 pairing-friendly elliptic curve construction"
