@@ -1,6 +1,30 @@
-# bls12_381 [![Crates.io](https://img.shields.io/crates/v/bls12_381.svg)](https://crates.io/crates/bls12_381) #
+# cosmian_bls12_381 [![Crates.io](https://img.shields.io/crates/v/cosmian_bls12_381.svg)](https://crates.io/crates/cosmian_bls12_381) #
 
 This crate provides an implementation of the BLS12-381 pairing-friendly elliptic curve construction.
+
+
+---
+# Forked by Cosmian
+
+## July 2021
+
+* In order to serialize/deserialize Gt elements and thanks to Aurore Guillevic, Cosmian added this implementation. Also, this eprint 2019-077 from Michael Scott confirmes the Gt deserialization verifications.
+* Also, 2 issues on bls12_381 github are still pending:
+    - https://github.com/zkcrypto/bls12_381/issues/10
+    - https://github.com/zkcrypto/bls12_381/pull/12
+
+## Novembre 2021
+
+* Hence no there is no plan to add Gt serialization, the crate is pusblished as cosmian_bls12_381 in 0.4.0 version.
+  * A Github-PR will be made soon on bls12_381 original crate.
+
+* But there is a remaining problem:
+  > Cosmian dit not update last version of bls12_381 (version 0.5) since it includes a dependency problem.
+  > Indeed, bls12_381-0.5 uses ff-0.10 which uses bitvec-0.22. The problem comes from the dependency funty-1.2.0 which did
+  > a breaking change (exposing another struct named BITS, confusing with same struct in bitvec crate).
+  > A comment on the funty crate has been made on July 2021 (followed by multiple same posts): https://github.com/myrrlyn/funty/issues/3#issuecomment-877833781
+---
+
 
 * **This implementation has not been reviewed or audited. Use at your own risk.**
 * This implementation targets Rust `1.47` or later.
@@ -15,7 +39,7 @@ This crate provides an implementation of the BLS12-381 pairing-friendly elliptic
 * `nightly`: Enables `subtle/nightly` which tries to prevent compiler optimizations that could jeopardize constant time operations. Requires the nightly Rust compiler.
 * `endo` (on by default): Enables optimizations that leverage curve endomorphisms. Deprecated, will be removed in a future release.
 
-## [Documentation](https://docs.rs/bls12_381)
+## [Documentation](https://docs.rs/cosmian_bls12_381)
 
 ## Curve Description
 
