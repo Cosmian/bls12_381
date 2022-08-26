@@ -63,6 +63,9 @@ impl Default for Fp12 {
     }
 }
 
+#[cfg(feature = "zeroize")]
+impl zeroize::DefaultIsZeroes for Fp12 {}
+
 impl fmt::Debug for Fp12 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?} + ({:?})*w", self.c0, self.c1)
@@ -234,7 +237,7 @@ impl Fp12 {
 
     /// Converts an element of `Fp12` into a byte representation in
     /// big-endian byte order.
-    pub fn to_bytes(&self) -> [u8; 576] {
+    pub fn to_bytes(self) -> [u8; 576] {
         let mut res = [0; 576];
 
         res[0..288].copy_from_slice(&self.c0.to_bytes());
@@ -738,4 +741,14 @@ fn test_arithmetic() {
             .frobenius_map()
             .frobenius_map()
     );
+}
+
+#[cfg(feature = "zeroize")]
+#[test]
+fn test_zeroize() {
+    use zeroize::Zeroize;
+
+    let mut a = Fp12::one();
+    a.zeroize();
+    assert!(bool::from(a.is_zero()));
 }

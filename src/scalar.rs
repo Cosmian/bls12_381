@@ -6,8 +6,11 @@ use core::fmt;
 use core::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use rand_core::RngCore;
 
-use ff::{Field, FieldBits, PrimeField};
+use ff::{Field, PrimeField};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption};
+
+#[cfg(feature = "bits")]
+use ff::{FieldBits, PrimeFieldBits};
 
 use crate::util::{adc, mac, sbb};
 
@@ -200,6 +203,9 @@ impl Default for Scalar {
         Self::zero()
     }
 }
+
+#[cfg(feature = "zeroize")]
+impl zeroize::DefaultIsZeroes for Scalar {}
 
 impl Scalar {
     /// Returns zero, the additive identity.
@@ -646,6 +652,18 @@ impl Scalar {
     }
 }
 
+impl From<Scalar> for [u64; 4] {
+    fn from(value: Scalar) -> Self {
+        value.0
+    }
+}
+
+impl<'a> From<&'a Scalar> for [u64; 4] {
+    fn from(value: &Scalar) -> Self {
+        value.0
+    }
+}
+
 impl From<Scalar> for [u8; 32] {
     fn from(value: Scalar) -> [u8; 32] {
         value.to_bytes()
@@ -655,14 +673,6 @@ impl From<Scalar> for [u8; 32] {
 impl<'a> From<&'a Scalar> for [u8; 32] {
     fn from(value: &'a Scalar) -> [u8; 32] {
         value.to_bytes()
-    }
-}
-
-impl<'a> From<&'a Scalar> for [u64; 4] {
-    fn from(value: &'a Scalar) -> [u64; 4] {
-        let res =
-            Scalar::montgomery_reduce(value.0[0], value.0[1], value.0[2], value.0[3], 0, 0, 0, 0);
-        res.0
     }
 }
 
@@ -679,10 +689,6 @@ impl Field for Scalar {
 
     fn one() -> Self {
         Self::one()
-    }
-
-    fn is_zero(&self) -> bool {
-        self.ct_eq(&Self::zero()).into()
     }
 
     #[must_use]
@@ -704,28 +710,44 @@ impl Field for Scalar {
     }
 }
 
-#[cfg(not(target_pointer_width = "64"))]
-type ReprBits = [u32; 8];
-
-#[cfg(target_pointer_width = "64")]
-type ReprBits = [u64; 4];
-
 impl PrimeField for Scalar {
     type Repr = [u8; 32];
-    type ReprBits = ReprBits;
 
-    fn from_repr(r: Self::Repr) -> Option<Self> {
-        let res = Self::from_bytes(&r);
-        if res.is_some().into() {
-            Some(res.unwrap())
-        } else {
-            None
-        }
+    fn from_repr(r: Self::Repr) -> CtOption<Self> {
+        Self::from_bytes(&r)
     }
 
     fn to_repr(&self) -> Self::Repr {
         self.to_bytes()
     }
+
+    fn is_odd(&self) -> Choice {
+        Choice::from(self.to_bytes()[0] & 1)
+    }
+
+    const NUM_BITS: u32 = MODULUS_BITS;
+    const CAPACITY: u32 = Self::NUM_BITS - 1;
+
+    fn multiplicative_generator() -> Self {
+        GENERATOR
+    }
+
+    const S: u32 = S;
+
+    fn root_of_unity() -> Self {
+        ROOT_OF_UNITY
+    }
+}
+
+#[cfg(all(feature = "bits", not(target_pointer_width = "64")))]
+type ReprBits = [u32; 8];
+
+#[cfg(all(feature = "bits", target_pointer_width = "64"))]
+type ReprBits = [u64; 4];
+
+#[cfg(feature = "bits")]
+impl PrimeFieldBits for Scalar {
+    type ReprBits = ReprBits;
 
     fn to_le_bits(&self) -> FieldBits<Self::ReprBits> {
         let bytes = self.to_bytes();
@@ -753,10 +775,6 @@ impl PrimeField for Scalar {
         FieldBits::new(limbs)
     }
 
-    fn is_odd(&self) -> bool {
-        self.to_bytes()[0] & 1 == 1
-    }
-
     fn char_le_bits() -> FieldBits<Self::ReprBits> {
         #[cfg(not(target_pointer_width = "64"))]
         {
@@ -765,19 +783,6 @@ impl PrimeField for Scalar {
 
         #[cfg(target_pointer_width = "64")]
         FieldBits::new(MODULUS.0)
-    }
-
-    const NUM_BITS: u32 = MODULUS_BITS;
-    const CAPACITY: u32 = Self::NUM_BITS - 1;
-
-    fn multiplicative_generator() -> Self {
-        GENERATOR
-    }
-
-    const S: u32 = S;
-
-    fn root_of_unity() -> Self {
-        ROOT_OF_UNITY
     }
 }
 
@@ -1237,4 +1242,19 @@ fn test_double() {
     ]);
 
     assert_eq!(a.double(), a + a);
+}
+
+#[cfg(feature = "zeroize")]
+#[test]
+fn test_zeroize() {
+    use zeroize::Zeroize;
+
+    let mut a = Scalar::from_raw([
+        0x1fff_3231_233f_fffd,
+        0x4884_b7fa_0003_4802,
+        0x998c_4fef_ecbc_4ff3,
+        0x1824_b159_acc5_0562,
+    ]);
+    a.zeroize();
+    assert!(bool::from(a.is_zero()));
 }

@@ -1,3 +1,47 @@
+# 0.7.0
+
+## Changed
+- MSRV bumped to `1.56.0`
+- Bumped dependencies to `ff 0.12`, `group 0.12`, `pairing 0.22`.
+
+# 0.6.1
+
+## Changed
+- G2 arithmetic is now 25-30% faster across the board.
+- Pairings are now 10-15% faster.
+
+# 0.6.0
+
+## Fixed
+- `bls12_381::Gt::default()` now returns `Gt::identity()` instead of a nonsensical value.
+
+## Added
+- Zeroization support for most public types, behind the `zeroize` feature flag.
+- `bls12_381::MillerLoopResult` trait implementations:
+  - `Default`
+  - `AddAssign<MillerLoopResult>`
+  - `AddAssign<&MillerLoopResult>`
+
+## Changed
+- Bumped dependencies to `ff 0.11`, `group 0.11`, `pairing 0.21`.
+
+## Removed
+- The deprecated `endo` feature flag.
+
+# 0.5.0
+
+## Added
+- `bits` feature flag (on by default) that exposes an `ff::PrimeFieldBits` implementation
+  on `bls12_381::Scalar`.
+- `experimental` feature flag, for features have no backwards-compatibility guarantees and
+  may change at any time.
+- Hashing to curves ([Internet Draft v11](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-11)),
+  behind the `experimental` feature flag.
+
+## Changed
+- Bumped dependencies to `ff 0.10`, `group 0.10`, `pairing 0.20`.
+- MSRV is now 1.51.0.
+
 # 0.4.0
 
 ## Changed
